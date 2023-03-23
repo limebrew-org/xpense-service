@@ -1,2 +1,2 @@
 # xpense-service
-Backend service for Xpense UI, written in express and typescript
+Backend service for Xpense UI built with Springboot, Firebase and Mongodb

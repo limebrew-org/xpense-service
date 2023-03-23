@@ -37,3 +37,5 @@ build.sh
 .env
 .env.dev
 .env.prod
+
+credentials/

@@ -16,10 +16,12 @@ public class TransactionController {
     @Autowired
     FirebaseAuthService firebaseAuthService;
 
-    private final int queryLimit = 100;
+    private final String queryDefault = "10";
+    private final String queryLimit = "100";
 
     @GetMapping(value = "/all")
-    public ResponseEntity<?> getAllTransactions(@RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> getAllTransactions(@RequestHeader("Authorization") String authHeader,
+                                                @RequestParam(defaultValue = queryDefault ) int limit) {
         return null;
     }
 
@@ -36,12 +38,14 @@ public class TransactionController {
     }
 
     @GetMapping(value = "/query/{id}")
-    public ResponseEntity<?> getTransactionById(@RequestHeader("Authorization") String authHeader, @PathVariable("id") String id) {
+    public ResponseEntity<?> getTransactionById(@RequestHeader("Authorization") String authHeader,
+                                                @PathVariable("id") String id) {
         return null;
     }
 
     @PostMapping(value = "/create")
-    public ResponseEntity<?> createTransaction(@RequestHeader("Authorization") String authHeader, @RequestBody Transaction transaction) {
+    public ResponseEntity<?> createTransaction(@RequestHeader("Authorization") String authHeader,
+                                               @RequestBody Transaction transaction) {
         return null;
     }
 

@@ -12,7 +12,7 @@
 	<artifactId>xpense-service</artifactId>
 	<version>1.0.${BUILD_NUMBER}</version>
 	<name>xpense-service</name>
-	<description>Backend service for Xpense UI built with Springboot, Firebase and Mongodb</description>
+	<description>Backend service for Xpense UI built with Springboot, Firebase and Firestore</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>

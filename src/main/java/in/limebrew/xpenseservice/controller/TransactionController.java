@@ -16,12 +16,15 @@ public class TransactionController {
     @Autowired
     FirebaseAuthService firebaseAuthService;
 
-    private final String queryDefault = "10";
-    private final String queryLimit = "100";
+    private final String itemCountDefault = "10";
+    private final String itemCountLimit = "100";
 
     @GetMapping(value = "/all")
     public ResponseEntity<?> getAllTransactions(@RequestHeader("Authorization") String authHeader,
-                                                @RequestParam(defaultValue = queryDefault ) int limit) {
+                                                @RequestParam(defaultValue = itemCountDefault ) int itemCount) {
+        if(itemCount>10){
+            System.out.println("Limit Exceeded");
+        }
         return null;
     }
 
@@ -34,6 +37,7 @@ public class TransactionController {
                                                    @RequestParam(defaultValue = "") String transactionType,
                                                    @RequestParam(defaultValue = "") String transactionTag,
                                                    @RequestParam(defaultValue = "") String transactionRemark) {
+
         return null;
     }
 

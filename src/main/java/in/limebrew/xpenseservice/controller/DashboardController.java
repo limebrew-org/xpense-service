@@ -28,7 +28,7 @@ public class DashboardController {
     }
 
     @GetMapping(value = "/range")
-    public ResponseEntity<?> getDashBoardByRange(@RequestHeader("Authorization") String authHeader,
+    public ResponseEntity<?> getDashBoardByDateRange(@RequestHeader("Authorization") String authHeader,
                                                  @RequestParam(defaultValue = "") Date startDate,
                                                  @RequestParam(defaultValue = "") Date endDate) {
         return null;

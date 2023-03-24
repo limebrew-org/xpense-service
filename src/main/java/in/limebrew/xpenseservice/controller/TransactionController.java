@@ -132,7 +132,7 @@ public class TransactionController {
             transaction.setProfileId(decodedToken.getUid());
 
             //? update in the database
-            transactionService.updateTransactionById();
+            transactionService.updateTransactionById(id, transaction);
 
         } catch (FirebaseAuthException | ExecutionException | InterruptedException e) {
             return new ResponseEntity<>("Unauthenticated!! Invalid token", HttpStatus.UNAUTHORIZED);
@@ -143,6 +143,19 @@ public class TransactionController {
     @DeleteMapping(value = "/delete/{id}")
     public ResponseEntity<?> deleteTransactionById(@RequestHeader("Authorization") String authHeader,
                                                    @PathVariable("id") String id) {
+        try {
+            //? Extract the token
+            String token = authHeader.substring(7);
+
+            //? Verify the JWT
+            FirebaseToken decodedToken = firebaseAuthService.verifyToken(token);
+
+            //? update in the database
+            transactionService.deleteTransactionById(id);
+
+        } catch (FirebaseAuthException | ExecutionException | InterruptedException e) {
+            return new ResponseEntity<>("Unauthenticated!! Invalid token", HttpStatus.UNAUTHORIZED);
+        }
         return null;
     }
 

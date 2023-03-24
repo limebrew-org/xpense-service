@@ -1,18 +1,45 @@
 package in.limebrew.xpenseservice.service.impl;
 
-import in.limebrew.xpenseservice.repository.TransactionRepository;
+import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.*;
+import in.limebrew.xpenseservice.entity.Transaction;
 import in.limebrew.xpenseservice.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
+//    @Autowired
+//    TransactionRepository transactionRepository;
+
     @Autowired
-    TransactionRepository transactionRepository;
+    private final Firestore firestore;
+    private final String transactionCollection = "transactions";
+
+    public TransactionServiceImpl(Firestore firestore) {
+        this.firestore = firestore;
+    }
 
     @Override
-    public void getAllTransactions(String profileId){}
+    public List<Transaction> getAllTransactions(String profileId) throws ExecutionException, InterruptedException {
+        CollectionReference transactions = firestore.collection(transactionCollection);
+        Query query = transactions.whereEqualTo("profileId", profileId);
+
+        ApiFuture<QuerySnapshot> querySnapshot = query.get();
+        List<QueryDocumentSnapshot> documents = querySnapshot.get().getDocuments();
+        List<Transaction> transactionsByProfileId = new ArrayList<>();
+
+        for(QueryDocumentSnapshot document: documents) {
+            transactionsByProfileId.add(document.toObject(Transaction.class));
+        }
+
+        return transactionsByProfileId;
+    }
 
     @Override
     public void getTransactionsByQuery(String profileId,
@@ -27,5 +54,26 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public void getTransactionsByRange(Date startDate, Date endDate, double startAmount, double endAmount){}
+    public void getTransactionsByRange(Date startDate, Date endDate, double startAmount, double endAmount){
+
+    }
+
+    @Override
+    public String createTransaction(Transaction transaction) throws ExecutionException, InterruptedException {
+        ApiFuture<WriteResult> collectionApiFuture = firestore.collection(transactionCollection).document().set(transaction);
+        return collectionApiFuture.get().getUpdateTime().toString();
+    }
+
+    @Override
+    public String updateTransactionById(String id, Transaction transaction) throws ExecutionException, InterruptedException{
+        ApiFuture<WriteResult> collectionApiFuture = firestore.collection(transactionCollection).document(id).set(transaction);
+        return collectionApiFuture.get().getUpdateTime().toString();
+    }
+
+    @Override
+    public String deleteTransactionById(String id)  throws ExecutionException, InterruptedException {
+        ApiFuture<WriteResult> collectionApiFuture = firestore.collection(transactionCollection).document(id).delete();
+        return collectionApiFuture.get().getUpdateTime().toString();
+    }
+
 }

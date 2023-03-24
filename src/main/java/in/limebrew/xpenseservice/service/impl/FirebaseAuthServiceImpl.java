@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 public class FirebaseAuthServiceImpl implements FirebaseAuthService {
 
     @Override
-    public FirebaseToken verfifyToken(String accessToken) throws FirebaseAuthException {
+    public FirebaseToken verifyToken(String accessToken) throws FirebaseAuthException {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseToken decodedToken = auth.verifyIdToken(accessToken);
         return decodedToken;

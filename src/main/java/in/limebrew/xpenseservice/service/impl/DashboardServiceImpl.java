@@ -9,8 +9,8 @@ import java.util.Date;
 
 @Service
 public class DashboardServiceImpl implements DashboardService {
-    @Autowired
-    TransactionRepository transactionRepository;
+//    @Autowired
+//    TransactionRepository transactionRepository;
 
     @Autowired
     TransactionService transactionService;

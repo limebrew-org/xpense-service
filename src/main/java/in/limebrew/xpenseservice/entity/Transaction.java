@@ -1,5 +1,6 @@
 package in.limebrew.xpenseservice.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.google.cloud.firestore.annotation.DocumentId;
 import lombok.*;
 import java.util.Date;
@@ -16,7 +17,8 @@ public class Transaction {
 
     public String profileId;
 
-    public Date creationDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    public String creationDate;
 
     public String creationMonth;
 

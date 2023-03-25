@@ -6,14 +6,13 @@ import in.limebrew.xpenseservice.entity.Transaction;
 import in.limebrew.xpenseservice.service.FirebaseAuthService;
 import in.limebrew.xpenseservice.service.TransactionService;
 import in.limebrew.xpenseservice.utils.DateUtil;
+import in.limebrew.xpenseservice.utils.ResponseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 @RestController
@@ -27,14 +26,21 @@ public class TransactionController {
     @Autowired
     TransactionService transactionService;
 
-    private final String itemCountDefault = "10";
-    private final String itemCountLimit = "100";
+    private static final String itemCountDefault = "10";
+    private static final String itemCountLimit = "100";
+
+    public boolean isLimitExceeds(int queryLimit){
+        return queryLimit > Integer.parseInt(itemCountLimit);
+    }
 
     @GetMapping(value = "/all")
-    public List<Transaction> getAllTransactions(@RequestHeader("Authorization") String authHeader,
-                                                @RequestParam(defaultValue = itemCountDefault ) int itemCount) {
+    public ResponseEntity<Map<String,Object>> getAllTransactions(@RequestHeader("Authorization") String authHeader,
+                                                                 @RequestParam(defaultValue = itemCountDefault ) int itemCount) {
 
-        List<Transaction> allTransactionsByProfileId = new ArrayList<>();
+        //? Check if Query limit request exceeds
+        if(isLimitExceeds(itemCount))
+            return ResponseUtil.errorLimitExceeded();
+
         try {
             //? Extract the token
             String token = authHeader.substring(7);
@@ -42,16 +48,14 @@ public class TransactionController {
             //? Verify the JWT
             FirebaseToken decodedToken = firebaseAuthService.verifyToken(token);
 
-            System.out.println("profileId: "+ decodedToken.getUid());
-
             //? Get all transactions by profile id
-            allTransactionsByProfileId = transactionService.getAllTransactions(decodedToken.getUid());
+            List<Transaction> allTransactionsByProfileId = transactionService.getAllTransactions(decodedToken.getUid());
 
-            return allTransactionsByProfileId;
-
+            //? Return response
+            return ResponseUtil.successGetMany(allTransactionsByProfileId);
 
         } catch (FirebaseAuthException | ExecutionException | InterruptedException e) {
-            return allTransactionsByProfileId;
+            return ResponseUtil.errorNotFound();
         }
 
     }
@@ -76,7 +80,7 @@ public class TransactionController {
     }
 
     @PostMapping(value = "/create")
-    public ResponseEntity<?> createTransaction(@RequestHeader("Authorization") String authHeader,
+    public ResponseEntity<Map<String,Object>> createTransaction(@RequestHeader("Authorization") String authHeader,
                                                @RequestBody Transaction transaction) {
         try {
             //? Extract the token
@@ -85,14 +89,9 @@ public class TransactionController {
             //? Verify the JWT
             FirebaseToken decodedToken = firebaseAuthService.verifyToken(token);
 
-            System.out.println("profileId: "+ decodedToken.getUid());
-
-            //? create the payload
-            System.out.println("request body");
-            System.out.println(transaction);
-
+            //? Check if valid date format
             if (!DateUtil.isValidDate(transaction.getCreationDate())) {
-                return null;
+                return ResponseUtil.errorParsingEntity("Error! Date format must be in dd-MM-yyyy");
             }
 
             //? Set the profile id from the JWT
@@ -101,14 +100,16 @@ public class TransactionController {
             //? Save in the database
             transactionService.createTransaction(transaction);
 
+            //? Return response
+            return ResponseUtil.successAddOne();
+
         } catch (FirebaseAuthException | ExecutionException | InterruptedException e) {
-            return new ResponseEntity<>("Unauthenticated!! Invalid token", HttpStatus.UNAUTHORIZED);
+            return ResponseUtil.errorUnauthorized();
         }
-        return null;
     }
 
     @PutMapping(value = "/update/{id}")
-    public ResponseEntity<?> updateTransactionById(@RequestHeader("Authorization") String authHeader,
+    public ResponseEntity<Map<String,Object>> updateTransactionById(@RequestHeader("Authorization") String authHeader,
                                                    @PathVariable("id") String id,
                                                    @RequestBody Transaction transaction) {
         try {
@@ -118,14 +119,9 @@ public class TransactionController {
             //? Verify the JWT
             FirebaseToken decodedToken = firebaseAuthService.verifyToken(token);
 
-            System.out.println("profileId: "+ decodedToken.getUid());
-
-            //? create the payload
-            System.out.println("request body");
-            System.out.println(transaction);
-
+            //? Check if valid date format
             if (!DateUtil.isValidDate(transaction.getCreationDate())) {
-                return null;
+                return ResponseUtil.errorParsingEntity("Error! Date format must be in dd-MM-yyyy");
             }
 
             //? Set the profile id from the JWT
@@ -134,14 +130,16 @@ public class TransactionController {
             //? update in the database
             transactionService.updateTransactionById(id, transaction);
 
+            //? Return response
+            return ResponseUtil.successUpdateOne();
+
         } catch (FirebaseAuthException | ExecutionException | InterruptedException e) {
-            return new ResponseEntity<>("Unauthenticated!! Invalid token", HttpStatus.UNAUTHORIZED);
+            return ResponseUtil.errorUnauthorized();
         }
-        return null;
     }
 
     @DeleteMapping(value = "/delete/{id}")
-    public ResponseEntity<?> deleteTransactionById(@RequestHeader("Authorization") String authHeader,
+    public ResponseEntity<Map<String,Object>> deleteTransactionById(@RequestHeader("Authorization") String authHeader,
                                                    @PathVariable("id") String id) {
         try {
             //? Extract the token
@@ -150,13 +148,15 @@ public class TransactionController {
             //? Verify the JWT
             FirebaseToken decodedToken = firebaseAuthService.verifyToken(token);
 
-            //? update in the database
+            //? Delete transaction by id
             transactionService.deleteTransactionById(id);
 
+            //? Return response
+            return ResponseUtil.successDeleteOne();
+
         } catch (FirebaseAuthException | ExecutionException | InterruptedException e) {
-            return new ResponseEntity<>("Unauthenticated!! Invalid token", HttpStatus.UNAUTHORIZED);
+            return ResponseUtil.errorUnauthorized();
         }
-        return null;
     }
 
 }

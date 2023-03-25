@@ -6,19 +6,17 @@ import in.limebrew.xpenseservice.entity.Transaction;
 import in.limebrew.xpenseservice.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
-//    @Autowired
-//    TransactionRepository transactionRepository;
-
     @Autowired
     private final Firestore firestore;
+
     private final String transactionCollection = "transactions";
 
     public TransactionServiceImpl(Firestore firestore) {
@@ -29,16 +27,20 @@ public class TransactionServiceImpl implements TransactionService {
     public List<Transaction> getAllTransactions(String profileId) throws ExecutionException, InterruptedException {
         CollectionReference transactions = firestore.collection(transactionCollection);
         Query query = transactions.whereEqualTo("profileId", profileId);
-
         ApiFuture<QuerySnapshot> querySnapshot = query.get();
         List<QueryDocumentSnapshot> documents = querySnapshot.get().getDocuments();
-        List<Transaction> transactionsByProfileId = new ArrayList<>();
 
-        for(QueryDocumentSnapshot document: documents) {
-            transactionsByProfileId.add(document.toObject(Transaction.class));
+        //? Handle if empty
+        if (documents.isEmpty()) {
+            return Collections.emptyList();
         }
 
-        return transactionsByProfileId;
+        //? Parse and append in Array
+        List<Transaction> result = new ArrayList<>();
+        for (QueryDocumentSnapshot document : documents) {
+            result.add(document.toObject(Transaction.class));
+        }
+        return result;
     }
 
     @Override

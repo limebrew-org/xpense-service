@@ -70,13 +70,34 @@ public class TransactionController {
                                                    @RequestParam(defaultValue = "") String transactionTag,
                                                    @RequestParam(defaultValue = "") String transactionRemark) {
 
+
         return null;
     }
 
     @GetMapping(value = "/query/{id}")
     public ResponseEntity<?> getTransactionById(@RequestHeader("Authorization") String authHeader,
                                                 @PathVariable("id") String id) {
-        return null;
+        try {
+            //? Extract the token
+            String token = authHeader.substring(7);
+
+            //? Verify the JWT
+            FirebaseToken decodedToken = firebaseAuthService.verifyToken(token);
+
+            //? Get all transactions by profile id
+            Transaction transactionById = transactionService.getTransactionById(decodedToken.getUid(), id);
+
+            //? Check if transaction was found
+            if(transactionById == null) {
+                return ResponseUtil.errorNotFound();
+            }
+
+            //? Return response
+            return ResponseUtil.successGetOne(transactionById);
+
+        } catch (FirebaseAuthException | ExecutionException | InterruptedException e) {
+            return ResponseUtil.errorNotFound();
+        }
     }
 
     @PostMapping(value = "/create")

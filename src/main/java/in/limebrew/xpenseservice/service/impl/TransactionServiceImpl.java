@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -26,21 +27,21 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public List<Transaction> getAllTransactions(String profileId) throws ExecutionException, InterruptedException {
         CollectionReference transactions = firestore.collection(transactionCollection);
-        Query query = transactions.whereEqualTo("profileId", profileId);
-        ApiFuture<QuerySnapshot> querySnapshot = query.get();
-        List<QueryDocumentSnapshot> documents = querySnapshot.get().getDocuments();
+        Query query = transactions.whereEqualTo("profileId", profileId).orderBy("transactionAmount", Query.Direction.DESCENDING);
+        ApiFuture<QuerySnapshot> future = query.get();
+        QuerySnapshot querySnapshot = future.get();
+        List<QueryDocumentSnapshot> transactionDocuments = querySnapshot.getDocuments();
 
         //? Handle if empty
-        if (documents.isEmpty()) {
+        if (transactionDocuments.isEmpty()) {
             return Collections.emptyList();
         }
 
         //? Parse and append in Array
         List<Transaction> result = new ArrayList<>();
-        for (QueryDocumentSnapshot document : documents) {
-            result.add(document.toObject(Transaction.class));
-        }
-        return result;
+        return transactionDocuments.stream()
+                .map(queryDocumentSnapshot -> queryDocumentSnapshot.toObject(Transaction.class))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -58,6 +59,19 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public void getTransactionsByRange(Date startDate, Date endDate, double startAmount, double endAmount){
 
+    }
+
+    @Override
+    public Transaction getTransactionById(String profileId, String id) throws ExecutionException, InterruptedException {
+        CollectionReference transactions = firestore.collection(transactionCollection);
+        DocumentReference transactionDocument = transactions.document(id);
+        DocumentSnapshot transactionSnapshot = transactionDocument.get().get();
+
+        //? Check if the id belongs to the profile id
+        if(transactionSnapshot.exists() && transactionSnapshot.getString("profileId").equals(profileId))
+            return transactionSnapshot.toObject(Transaction.class);
+
+        return null;
     }
 
     @Override

@@ -21,6 +21,8 @@ public interface TransactionService {
                                 String transactionRemarks);
     void getTransactionsByRange(Date startDate, Date endDate, double startAmount, double endAmount);
 
+    Transaction getTransactionById(String profileId ,String id) throws ExecutionException, InterruptedException;
+
     String createTransaction(Transaction transaction) throws ExecutionException, InterruptedException;
 
     String updateTransactionById(String id, Transaction transaction) throws ExecutionException, InterruptedException;

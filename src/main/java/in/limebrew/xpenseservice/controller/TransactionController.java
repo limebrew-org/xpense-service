@@ -35,10 +35,10 @@ public class TransactionController {
 
     @GetMapping(value = "/all")
     public ResponseEntity<Map<String,Object>> getAllTransactions(@RequestHeader("Authorization") String authHeader,
-                                                                 @RequestParam(defaultValue = itemCountDefault ) int itemCount) {
+                                                                 @RequestParam(defaultValue = itemCountDefault ) int queryCount) {
 
         //? Check if Query limit request exceeds
-        if(isLimitExceeds(itemCount))
+        if(isLimitExceeds(queryCount))
             return ResponseUtil.errorLimitExceeded();
 
         try {

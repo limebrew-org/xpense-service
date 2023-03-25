@@ -26,19 +26,19 @@ public class TransactionController {
     @Autowired
     TransactionService transactionService;
 
-    private static final String itemCountDefault = "10";
-    private static final String itemCountLimit = "100";
+    private static final String limitDefault = "10";
+    private static final String exceedLimit = "100";
 
     public boolean isLimitExceeds(int queryLimit){
-        return queryLimit > Integer.parseInt(itemCountLimit);
+        return queryLimit > Integer.parseInt(exceedLimit);
     }
 
     @GetMapping(value = "/all")
     public ResponseEntity<Map<String,Object>> getAllTransactions(@RequestHeader("Authorization") String authHeader,
-                                                                 @RequestParam(defaultValue = itemCountDefault ) int queryCount) {
+                                                                 @RequestParam(defaultValue = limitDefault ) int limit) {
 
         //? Check if Query limit request exceeds
-        if(isLimitExceeds(queryCount))
+        if(isLimitExceeds(limit))
             return ResponseUtil.errorLimitExceeded();
 
         try {
@@ -49,7 +49,7 @@ public class TransactionController {
             FirebaseToken decodedToken = firebaseAuthService.verifyToken(token);
 
             //? Get all transactions by profile id
-            List<Transaction> allTransactionsByProfileId = transactionService.getAllTransactions(decodedToken.getUid());
+            List<Transaction> allTransactionsByProfileId = transactionService.getAllTransactions(decodedToken.getUid(),limit);
 
             //? Return response
             return ResponseUtil.successGetMany(allTransactionsByProfileId);

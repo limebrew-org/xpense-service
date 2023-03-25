@@ -10,7 +10,7 @@ import java.util.concurrent.ExecutionException;
 
 @Service
 public interface TransactionService {
-    List<Transaction> getAllTransactions(String profileId) throws ExecutionException, InterruptedException;
+    List<Transaction> getAllTransactions(String profileId, int limit) throws ExecutionException, InterruptedException;
     void getTransactionsByQuery(String profileId,
                                 Date creationDate,
                                 String creationMonth,

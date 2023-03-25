@@ -6,7 +6,6 @@ import in.limebrew.xpenseservice.entity.Transaction;
 import in.limebrew.xpenseservice.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -25,11 +24,16 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<Transaction> getAllTransactions(String profileId) throws ExecutionException, InterruptedException {
+    public List<Transaction> getAllTransactions(String profileId, int limit) throws ExecutionException, InterruptedException {
         CollectionReference transactions = firestore.collection(transactionCollection);
-        Query query = transactions.whereEqualTo("profileId", profileId).orderBy("profileId").orderBy("transactionAmount", Query.Direction.DESCENDING);
-        ApiFuture<QuerySnapshot> future = query.get();
-        QuerySnapshot querySnapshot = future.get();
+
+        //? Filter By ProfileId and sort by CreationDate (requires composite index)
+        Query query = transactions
+                .whereEqualTo("profileId", profileId)
+                .orderBy("creationDate", Query.Direction.DESCENDING)
+                .limit(limit);
+
+        QuerySnapshot querySnapshot = query.get().get();
         List<QueryDocumentSnapshot> transactionDocuments = querySnapshot.getDocuments();
 
         //? Handle if empty

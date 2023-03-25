@@ -27,7 +27,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public List<Transaction> getAllTransactions(String profileId) throws ExecutionException, InterruptedException {
         CollectionReference transactions = firestore.collection(transactionCollection);
-        Query query = transactions.whereEqualTo("profileId", profileId).orderBy("transactionAmount", Query.Direction.DESCENDING);
+        Query query = transactions.whereEqualTo("profileId", profileId).orderBy("profileId").orderBy("transactionAmount", Query.Direction.DESCENDING);
         ApiFuture<QuerySnapshot> future = query.get();
         QuerySnapshot querySnapshot = future.get();
         List<QueryDocumentSnapshot> transactionDocuments = querySnapshot.getDocuments();
@@ -37,8 +37,7 @@ public class TransactionServiceImpl implements TransactionService {
             return Collections.emptyList();
         }
 
-        //? Parse and append in Array
-        List<Transaction> result = new ArrayList<>();
+        //? Parse documents
         return transactionDocuments.stream()
                 .map(queryDocumentSnapshot -> queryDocumentSnapshot.toObject(Transaction.class))
                 .collect(Collectors.toList());

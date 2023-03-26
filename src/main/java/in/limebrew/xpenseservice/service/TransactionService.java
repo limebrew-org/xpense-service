@@ -12,13 +12,14 @@ import java.util.concurrent.ExecutionException;
 public interface TransactionService {
     List<Transaction> getAllTransactions(String profileId, int limit) throws ExecutionException, InterruptedException;
     void getTransactionsByQuery(String profileId,
-                                Date creationDate,
+                                String creationDate,
                                 String creationMonth,
-                                int creationYear,
-                                double transactionAmount,
+                                String creationYear,
+                                String transactionAmount,
                                 String transactionType,
                                 String transactionTag,
-                                String transactionRemarks);
+                                String transactionRemarks,
+                                int limit);
     void getTransactionsByRange(Date startDate, Date endDate, double startAmount, double endAmount);
 
     Transaction getTransactionById(String profileId ,String id) throws ExecutionException, InterruptedException;

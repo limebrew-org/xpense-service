@@ -62,16 +62,45 @@ public class TransactionController {
 
     @GetMapping(value = "/query")
     public ResponseEntity<?> getTransactionByQuery(@RequestHeader("Authorization") String authHeader,
-                                                   @RequestParam(defaultValue = "") Date creationDate,
+                                                   @RequestParam(defaultValue = "") String creationDate,
                                                    @RequestParam(defaultValue = "") String creationMonth,
-                                                   @RequestParam(defaultValue = "") int creationYear,
-                                                   @RequestParam(defaultValue = "") double transactionAmount,
+                                                   @RequestParam(defaultValue = "") String creationYear,
+                                                   @RequestParam(defaultValue = "") String transactionAmount,
                                                    @RequestParam(defaultValue = "") String transactionType,
                                                    @RequestParam(defaultValue = "") String transactionTag,
-                                                   @RequestParam(defaultValue = "") String transactionRemark) {
+                                                   @RequestParam(defaultValue = "") String transactionRemark,
+                                                   @RequestParam(defaultValue = limitDefault ) int limit) {
 
+        //? Check if Query limit request exceeds
+        if(isLimitExceeds(limit))
+            return ResponseUtil.errorLimitExceeded();
 
-        return null;
+        try {
+            //? Extract the token
+            String token = authHeader.substring(7);
+
+            //? Verify the JWT
+            FirebaseToken decodedToken = firebaseAuthService.verifyToken(token);
+
+            //? Get all transactions by profile id
+             transactionService.getTransactionsByQuery(
+                    decodedToken.getUid(),
+                    creationDate,
+                    creationMonth,
+                    creationYear,
+                    transactionAmount,
+                    transactionType,
+                    transactionTag,
+                    transactionRemark,
+                    limit);
+
+            //? Return response
+            return null;
+
+        } catch (FirebaseAuthException e) {
+            return ResponseUtil.errorNotFound();
+        }
+
     }
 
     @GetMapping(value = "/query/{id}")

@@ -49,14 +49,23 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public void getTransactionsByQuery(String profileId,
-                                       Date creationDate,
+                                       String creationDate,
                                        String creationMonth,
-                                       int creationYear,
-                                       double transactionAmount,
+                                       String creationYear,
+                                       String transactionAmount,
                                        String transactionType,
                                        String transactionTag,
-                                       String transactionRemarks){
+                                       String transactionRemarks,
+                                       int limit){
 
+        System.out.println("profileId: " + profileId);
+        System.out.println("creationDate: " + creationDate);
+        System.out.println("creationMonth: " + creationMonth);
+        System.out.println("creationYear: " + creationYear);
+        System.out.println("transactionAmount: " + transactionAmount);
+        System.out.println("transactionType: " + transactionType);
+        System.out.println("transactionTag: " + transactionTag);
+        System.out.println("transactionRemarks: " + transactionRemarks);
     }
 
     @Override

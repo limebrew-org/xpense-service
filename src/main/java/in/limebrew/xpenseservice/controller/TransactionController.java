@@ -7,9 +7,12 @@ import in.limebrew.xpenseservice.service.FirebaseAuthService;
 import in.limebrew.xpenseservice.service.TransactionService;
 import in.limebrew.xpenseservice.utils.DateUtil;
 import in.limebrew.xpenseservice.utils.ResponseUtil;
+import in.limebrew.xpenseservice.utils.TransactionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -133,7 +136,7 @@ public class TransactionController {
     public ResponseEntity<Map<String,Object>> createTransaction(@RequestHeader("Authorization") String authHeader,
                                                @RequestBody Transaction transaction) {
         try {
-            //? Extract the token
+            //? Extract the token  Bearer_
             String token = authHeader.substring(7);
 
             //? Verify the JWT
@@ -147,13 +150,17 @@ public class TransactionController {
             //? Set the profile id from the JWT
             transaction.setProfileId(decodedToken.getUid());
 
+            //? Set the Month and Year in the entity
+            transaction.setCreationMonth(TransactionUtil.getMonthFromDate(transaction.getCreationDate()));
+            transaction.setCreationYear(TransactionUtil.getYearFromDate(transaction.getCreationDate()));
+
             //? Save in the database
             transactionService.createTransaction(transaction);
 
             //? Return response
             return ResponseUtil.successAddOne();
 
-        } catch (FirebaseAuthException | ExecutionException | InterruptedException e) {
+        } catch (FirebaseAuthException | ExecutionException | InterruptedException | ParseException e) {
             return ResponseUtil.errorUnauthorized();
         }
     }

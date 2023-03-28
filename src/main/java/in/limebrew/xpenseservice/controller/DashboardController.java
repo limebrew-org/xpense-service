@@ -4,13 +4,13 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
 import in.limebrew.xpenseservice.service.DashboardService;
 import in.limebrew.xpenseservice.service.FirebaseAuthService;
+import in.limebrew.xpenseservice.utils.DateUtil;
 import in.limebrew.xpenseservice.utils.ResponseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.text.ParseException;
-import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -56,8 +56,8 @@ public class DashboardController {
 
     @GetMapping(value = "/range")
     public ResponseEntity<?> getDashBoardByDateRange(@RequestHeader("Authorization") String authHeader,
-                                                 @RequestParam(defaultValue = "") Date startDate,
-                                                 @RequestParam(defaultValue = "") Date endDate) {
+                                                 @RequestParam(defaultValue = "", required = true) String startDate,
+                                                 @RequestParam(defaultValue = "", required = true) String endDate) {
         try {
             //? Extract the token
             String token = authHeader.substring(7);
@@ -67,11 +67,23 @@ public class DashboardController {
 
             System.out.println("profileId: "+ decodedToken.getUid());
 
+            //? Check if required dates are valid or not
+            if(!DateUtil.isValidDate(startDate) || !DateUtil.isValidDate(endDate)){
+                return ResponseUtil.errorParsingEntity("Required Date must be passed in query and should be in dd-MM-yyyy format");
+            }
 
-        } catch (FirebaseAuthException e) {
+            //? Return the dashboard based on date range
+            Map<String, Object> dashboardInfo = dashboardService.getDashboardByDateRange(
+                    decodedToken.getUid(),
+                    startDate,
+                    endDate
+            );
+            return ResponseUtil.handleDashboardInfo(dashboardInfo);
+
+        } catch (FirebaseAuthException | ExecutionException | InterruptedException e) {
             return new ResponseEntity<>("Unauthenticated!! Invalid token", HttpStatus.UNAUTHORIZED);
         }
-        return null;
+
     }
 
 }

@@ -44,14 +44,12 @@ public class DashboardServiceImpl implements DashboardService {
                     .whereEqualTo("creationYear",Integer.parseInt(creationYear));
 
             //? Order by Creation date
-            query = query.orderBy("creationDate", Query.Direction.DESCENDING);
+
         }
         //? Check if year passed
         else if(TransactionUtil.isValidYear(creationYear)){
             query = query.whereEqualTo("creationYear",Integer.parseInt(creationYear));
 
-            //? Order by Creation date
-            query = query.orderBy("creationDate", Query.Direction.DESCENDING);
         }
         else {
             return new HashMap<>();
@@ -71,5 +69,24 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
-    public void getDashboardByDateRange(String profileId, Date startDate, Date endDate){}
+    public Map<String, Object> getDashboardByDateRange(String profileId, String startDate, String endDate) throws ExecutionException, InterruptedException {
+        CollectionReference transactionCollectionRef = firestore.collection(transactionCollection);
+
+        //? Query By ProfileId
+        Query query = transactionCollectionRef.whereEqualTo("profileId", profileId)
+                                              .whereGreaterThan("creationDate", startDate)
+                                              .whereLessThan("creationDate", endDate);
+
+        //? Query in the db
+        QuerySnapshot querySnapshot = query.get().get();
+        List<QueryDocumentSnapshot> transactionDocuments = querySnapshot.getDocuments();
+
+        //? Handle if empty
+        if (transactionDocuments.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        //? Compute and return dashboard info
+        return TransactionUtil.computeDashboard(transactionDocuments);
+    }
 }

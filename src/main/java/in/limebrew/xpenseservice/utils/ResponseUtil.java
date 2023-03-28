@@ -20,6 +20,23 @@ public class ResponseUtil {
     public static final int HTTP_STATUS_INTERNAL_SERVER_ERROR = 500;
     public static final int HTTP_STATUS_PARSING_ERROR = 500;
 
+    //? Success GetDashboard
+    public static ResponseEntity<Map<String,Object>> handleDashboardInfo(Map<String,Object> dashboardInfo){
+        Map<String,Object> response = new HashMap<>();
+
+        if(dashboardInfo.isEmpty()){
+            dashboardInfo.put("netEarnings",0);
+            dashboardInfo.put("netExpenses",0);
+            dashboardInfo.put("netInvestments",0);
+            dashboardInfo.put("netFundTransfer",0);
+        }
+
+        response.put("status",HTTP_STATUS_OK);
+        response.put("message","Dashboard info");
+        response.put("data",dashboardInfo);
+        return new ResponseEntity<>(response,HttpStatus.OK);
+    }
+
     //? Success GetOne
     public static ResponseEntity<Map<String,Object>> successGetOne(Transaction transaction){
         Map<String,Object> response = new HashMap<>();

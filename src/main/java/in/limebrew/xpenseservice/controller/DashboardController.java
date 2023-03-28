@@ -2,19 +2,16 @@ package in.limebrew.xpenseservice.controller;
 
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
-import in.limebrew.xpenseservice.entity.Transaction;
 import in.limebrew.xpenseservice.service.DashboardService;
 import in.limebrew.xpenseservice.service.FirebaseAuthService;
-import in.limebrew.xpenseservice.utils.DateUtil;
 import in.limebrew.xpenseservice.utils.ResponseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.text.ParseException;
 import java.util.Date;
-import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 @RestController
@@ -41,7 +38,7 @@ public class DashboardController {
             FirebaseToken decodedToken = firebaseAuthService.verifyToken(token);
 
             //? Get Dashboard By Query for a profile
-            List<Transaction> dashboardByQuery = dashboardService.getDashboardByQuery(
+            Map<String,Object> dashboardInfo = dashboardService.getDashboardByQuery(
                     decodedToken.getUid(),
                     creationDate,
                     creationMonth,
@@ -49,7 +46,7 @@ public class DashboardController {
             );
 
             //? Return response
-            return ResponseUtil.successGetMany(dashboardByQuery);
+            return ResponseUtil.handleDashboardInfo(dashboardInfo);
 
         } catch (FirebaseAuthException | ExecutionException | InterruptedException | ParseException e) {
             System.out.println("Error: "+e);

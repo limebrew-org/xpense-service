@@ -1,14 +1,8 @@
 package in.limebrew.xpenseservice.utils;
 
 import com.google.cloud.firestore.QueryDocumentSnapshot;
-import in.limebrew.xpenseservice.entity.Transaction;
-import in.limebrew.xpenseservice.service.impl.DashboardServiceImpl;
-
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public class TransactionUtil {
     public static final List<String> monthList = Arrays.asList("jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec");
@@ -25,39 +19,96 @@ public class TransactionUtil {
     }
 
     public static boolean isValidMonth(String month){
-        if(month == "" || !TransactionUtil.monthList.contains(month)) return false;
-        else return true;
+        return !Objects.equals(month, "") && TransactionUtil.monthList.contains(month);
     }
 
     public static boolean isValidYear(String year){
         try {
             int parsedCreationYear = Integer.parseInt(year);
-            if(parsedCreationYear<2020) return false;
-            return true;
+            return parsedCreationYear >= 2020;
         }
         catch (Exception e){
             return false;
         }
     }
 
-    public static boolean isValidFields (
-                                        String creationDate,
-                                        String creationMonth,
-                                        String creationYear,
-                                        String transactionAmount,
-                                        String transactionType,
-                                        String transactionTag,
-                                        String transactionRemarks) throws ParseException, NumberFormatException {
-        try {
-            if(!DateUtil.isValidDate(creationDate)) return false;
-            if(!TransactionUtil.isValidMonth(creationMonth)) return false;
-            if(!TransactionUtil.isValidYear(creationYear)) return false;
+    public static Map<String,Object> computeDashboard(List<QueryDocumentSnapshot> transactionDocuments){
+        Map<String,Object> dashboardMap = new HashMap<>();
+        double netEarnings,netExpenses,netInvestments,netFundTransfers;
 
-                return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
+        //? Compute Dashboard Fields
+        netEarnings = TransactionUtil.computeEarning(transactionDocuments);
+        netExpenses = TransactionUtil.computeExpense(transactionDocuments);
+        netInvestments = TransactionUtil.computeInvestment(transactionDocuments);
+        netFundTransfers = TransactionUtil.computeFundTransfer(transactionDocuments);
 
+        //? Store in the hashmap
+        dashboardMap.put("netEarnings",netEarnings);
+        dashboardMap.put("netExpenses",netExpenses);
+        dashboardMap.put("netInvestments",netInvestments);
+        dashboardMap.put("netFundTransfers",netFundTransfers);
+        return dashboardMap;
+    }
+
+    public static double computeEarning(List<QueryDocumentSnapshot> transactionDocuments){
+        return transactionDocuments
+                .stream()
+                .filter( transactionDocument ->
+                        Objects.equals(transactionDocument.getData().get("transactionTag").toString(),"earning") &&
+                        Objects.equals(transactionDocument.getData().get("transactionType").toString(),"credit")
+                )
+                .mapToDouble(transactionDocument -> (double) transactionDocument.getData().get("transactionAmount"))
+                .sum();
+    }
+
+    public static double computeExpense(List<QueryDocumentSnapshot> transactionDocuments){
+        return transactionDocuments
+                .stream()
+                .filter( transactionDocument ->
+                        Objects.equals(transactionDocument.getData().get("transactionTag").toString(),"expense")
+                )
+                .mapToDouble(transactionDocument -> {
+                        String transactionType = transactionDocument.getData().get("transactionType").toString();
+                        double transactionAmount = (double) transactionDocument.getData().get("transactionAmount");
+
+                        if(Objects.equals(transactionType,"debit"))
+                            return transactionAmount;
+                        if(Objects.equals(transactionType,"credit"))
+                            return -transactionAmount;
+                        return 0;
+                })
+                .sum();
+    }
+
+    public static double computeInvestment(List<QueryDocumentSnapshot> transactionDocuments){
+        return transactionDocuments
+                .stream()
+                .filter( transactionDocument ->
+                        Objects.equals(transactionDocument.getData().get("transactionTag").toString(),"investment")
+                )
+                .mapToDouble(transactionDocument -> {
+                    String transactionType = transactionDocument
+                            .getData()
+                            .get("transactionType")
+                            .toString();
+
+                    double transactionAmount = (double) transactionDocument.getData().get("transactionAmount");
+
+                    if(Objects.equals(transactionType,"debit"))
+                        return transactionAmount;
+                    if(Objects.equals(transactionType,"credit"))
+                        return -transactionAmount;
+                    return 0;
+                })
+                .sum();
+    }
+
+    public static double computeFundTransfer(List<QueryDocumentSnapshot> transactionDocuments){
+        return transactionDocuments
+                .stream()
+                .filter( transactionDocument -> Objects.equals(transactionDocument.getData().get("transactionTag").toString(),"fund_transfer"))
+                .mapToDouble(transactionDocument -> (double) transactionDocument.getData().get("transactionAmount"))
+                .sum();
     }
 
 }

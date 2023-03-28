@@ -80,7 +80,8 @@ public class DashboardController {
             );
             return ResponseUtil.handleDashboardInfo(dashboardInfo);
 
-        } catch (FirebaseAuthException | ExecutionException | InterruptedException e) {
+        } catch (FirebaseAuthException | ExecutionException | InterruptedException | ParseException e) {
+            System.out.println("error: " + e);
             return new ResponseEntity<>("Unauthenticated!! Invalid token", HttpStatus.UNAUTHORIZED);
         }
 

@@ -7,5 +7,5 @@ import java.util.concurrent.ExecutionException;
 
 public interface DashboardService {
     Map<String,Object> getDashboardByQuery(String profileId, String creationDate, String creationMonth, String creationYear) throws ExecutionException, InterruptedException, ParseException;
-    Map<String, Object> getDashboardByDateRange(String profileId, String startDate, String endDate) throws ExecutionException, InterruptedException;
+    Map<String, Object> getDashboardByDateRange(String profileId, String startDate, String endDate) throws ExecutionException, InterruptedException, ParseException;
 }

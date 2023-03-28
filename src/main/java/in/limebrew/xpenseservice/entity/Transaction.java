@@ -20,6 +20,8 @@ public class Transaction {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     public String creationDate;
 
+    public String creationTimeStamp;
+
     public String creationMonth;
 
     public int creationYear;

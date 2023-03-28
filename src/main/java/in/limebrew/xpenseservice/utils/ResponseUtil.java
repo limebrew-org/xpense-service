@@ -25,10 +25,11 @@ public class ResponseUtil {
         Map<String,Object> response = new HashMap<>();
 
         if(dashboardInfo.isEmpty()){
-            dashboardInfo.put("netEarnings",0);
-            dashboardInfo.put("netExpenses",0);
-            dashboardInfo.put("netInvestments",0);
-            dashboardInfo.put("netFundTransfer",0);
+            dashboardInfo.put("netEarnings",String.format("%.2f",0.0f));
+            dashboardInfo.put("netExpenses",String.format("%.2f",0.0f));
+            dashboardInfo.put("netInvestments",String.format("%.2f",0.0f));
+            dashboardInfo.put("netFundTransfer",String.format("%.2f",0.0f));
+            dashboardInfo.put("netSavings", String.format("%.2f",0.0f));
         }
 
         response.put("status",HTTP_STATUS_OK);

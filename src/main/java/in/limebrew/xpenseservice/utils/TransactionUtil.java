@@ -34,19 +34,21 @@ public class TransactionUtil {
 
     public static Map<String,Object> computeDashboard(List<QueryDocumentSnapshot> transactionDocuments){
         Map<String,Object> dashboardMap = new HashMap<>();
-        double netEarnings,netExpenses,netInvestments,netFundTransfers;
+        double netEarnings,netExpenses,netInvestments,netFundTransfers, netSavings;
 
         //? Compute Dashboard Fields
         netEarnings = TransactionUtil.computeEarning(transactionDocuments);
         netExpenses = TransactionUtil.computeExpense(transactionDocuments);
         netInvestments = TransactionUtil.computeInvestment(transactionDocuments);
         netFundTransfers = TransactionUtil.computeFundTransfer(transactionDocuments);
+        netSavings = TransactionUtil.computeEndSavings(netEarnings, netExpenses, netInvestments);
 
         //? Store in the hashmap
-        dashboardMap.put("netEarnings",netEarnings);
-        dashboardMap.put("netExpenses",netExpenses);
-        dashboardMap.put("netInvestments",netInvestments);
-        dashboardMap.put("netFundTransfers",netFundTransfers);
+        dashboardMap.put("netEarnings",String.format("%.2f",netEarnings));
+        dashboardMap.put("netExpenses",String.format("%.2f",netExpenses));
+        dashboardMap.put("netInvestments",String.format("%.2f",netInvestments));
+        dashboardMap.put("netFundTransfers",String.format("%.2f",netFundTransfers));
+        dashboardMap.put("netSavings", String.format("%.2f",netSavings));
         return dashboardMap;
     }
 
@@ -109,6 +111,14 @@ public class TransactionUtil {
                 .filter( transactionDocument -> Objects.equals(transactionDocument.getData().get("transactionTag").toString(),"fund_transfer"))
                 .mapToDouble(transactionDocument -> (double) transactionDocument.getData().get("transactionAmount"))
                 .sum();
+    }
+
+    public static double computeEndSavings(
+            double netEarnings,
+            double netExpenses,
+            double netInvestment
+    ) {
+        return (netEarnings - netExpenses - netInvestment);
     }
 
 }

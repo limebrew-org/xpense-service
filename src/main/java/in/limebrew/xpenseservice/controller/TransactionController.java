@@ -150,9 +150,11 @@ public class TransactionController {
             //? Set the profile id from the JWT
             transaction.setProfileId(decodedToken.getUid());
 
-            //? Set the Month and Year in the entity
+            //? Set the Month and Year and Timestamp in the entity
             transaction.setCreationMonth(TransactionUtil.getMonthFromDate(transaction.getCreationDate()));
             transaction.setCreationYear(TransactionUtil.getYearFromDate(transaction.getCreationDate()));
+            transaction.setCreationTimeStamp(DateUtil.getUnixTimeFromDate(transaction.getCreationDate()));
+
 
             //? Save in the database
             transactionService.createTransaction(transaction);
@@ -181,8 +183,11 @@ public class TransactionController {
                 return ResponseUtil.errorParsingEntity("Error! Date format must be in dd-MM-yyyy");
             }
 
-            //? Set the profile id from the JWT
+            //? Set the profile id , month and year from the JWT
             transaction.setProfileId(decodedToken.getUid());
+            transaction.setCreationTimeStamp(DateUtil.getUnixTimeFromDate(transaction.getCreationDate()));
+            transaction.setCreationMonth(TransactionUtil.getMonthFromDate(transaction.getCreationDate()));
+            transaction.setCreationYear(TransactionUtil.getYearFromDate(transaction.getCreationDate()));
 
             //? update in the database
             transactionService.updateTransactionById(id, transaction);
@@ -190,7 +195,7 @@ public class TransactionController {
             //? Return response
             return ResponseUtil.successUpdateOne();
 
-        } catch (FirebaseAuthException | ExecutionException | InterruptedException e) {
+        } catch (FirebaseAuthException | ExecutionException | InterruptedException | ParseException e) {
             return ResponseUtil.errorUnauthorized();
         }
     }

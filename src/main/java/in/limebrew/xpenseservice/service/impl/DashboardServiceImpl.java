@@ -69,13 +69,17 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
-    public Map<String, Object> getDashboardByDateRange(String profileId, String startDate, String endDate) throws ExecutionException, InterruptedException {
+    public Map<String, Object> getDashboardByDateRange(String profileId, String startDate, String endDate) throws ExecutionException, InterruptedException, ParseException {
         CollectionReference transactionCollectionRef = firestore.collection(transactionCollection);
+
+        //? Convert start and end date into unix timestamp
+        String startUnixTimeStamp = DateUtil.getUnixTimeFromDate(startDate);
+        String endUnixTimeStamp = DateUtil.getUnixTimeFromDate(endDate);
 
         //? Query By ProfileId
         Query query = transactionCollectionRef.whereEqualTo("profileId", profileId)
-                                              .whereGreaterThan("creationDate", startDate)
-                                              .whereLessThan("creationDate", endDate);
+                                              .whereGreaterThan("creationTimeStamp", startUnixTimeStamp)
+                                              .whereLessThan("creationTimeStamp", endUnixTimeStamp);
 
         //? Query in the db
         QuerySnapshot querySnapshot = query.get().get();

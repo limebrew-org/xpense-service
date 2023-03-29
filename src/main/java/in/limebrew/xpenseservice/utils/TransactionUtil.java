@@ -32,6 +32,16 @@ public class TransactionUtil {
         }
     }
 
+    public static boolean idValidAmount(String amount) {
+        try {
+            double parsedAmount = Double.parseDouble(amount);
+            return parsedAmount > 0.0;
+        }
+        catch (Exception e) {
+            return false;
+        }
+    }
+
     public static Map<String,Object> computeDashboard(List<QueryDocumentSnapshot> transactionDocuments){
         Map<String,Object> dashboardMap = new HashMap<>();
         double netEarnings,netExpenses,netInvestments,netFundTransfers, netSavings;
@@ -48,7 +58,7 @@ public class TransactionUtil {
         dashboardMap.put("netExpenses",String.format("%.2f",netExpenses));
         dashboardMap.put("netInvestments",String.format("%.2f",netInvestments));
         dashboardMap.put("netFundTransfers",String.format("%.2f",netFundTransfers));
-        dashboardMap.put("netSavings", String.format("%.2f",netSavings));
+        dashboardMap.put("netSavings", String.format("%.2f",netSavings) );
         return dashboardMap;
     }
 

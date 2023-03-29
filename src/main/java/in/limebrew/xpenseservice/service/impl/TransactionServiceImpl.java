@@ -3,9 +3,14 @@ package in.limebrew.xpenseservice.service.impl;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import in.limebrew.xpenseservice.entity.Transaction;
+import in.limebrew.xpenseservice.query.TransactionQueryBuilder;
 import in.limebrew.xpenseservice.service.TransactionService;
+import in.limebrew.xpenseservice.utils.DateUtil;
+import in.limebrew.xpenseservice.utils.TransactionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.text.ParseException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -48,29 +53,65 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public void getTransactionsByQuery(String profileId,
+    public List<Transaction> getTransactionsByQuery(String profileId,
+                                                    String creationDate,
+                                                    String creationMonth,
+                                                    String creationYear,
+                                                    String transactionAmount,
+                                                    String transactionType,
+                                                    String transactionTag,
+                                                    String transactionRemarks,
+                                                    int limit) throws ExecutionException, InterruptedException, NullPointerException {
+
+        CollectionReference transactionCollectionRef = firestore.collection(transactionCollection);
+
+        //? Query By ProfileId
+        Query query = transactionCollectionRef.whereEqualTo("profileId", profileId);
+
+        //? Build time query
+        query = TransactionQueryBuilder.buildQueryByTime(query, creationDate, creationMonth, creationYear);
+
+        //? Build transaction query
+        query = TransactionQueryBuilder.buildQueryByTransaction(query, transactionAmount,transactionType,transactionTag,transactionRemarks);
+
+        //? Query in the db
+        QuerySnapshot querySnapshot = query.get().get();
+        List<QueryDocumentSnapshot> transactionDocuments = querySnapshot.getDocuments();
+
+        return transactionDocuments.stream().map(queryDocumentSnapshot -> queryDocumentSnapshot.toObject(Transaction.class)).collect(Collectors.toList());
+
+    }
+
+    @Override
+    public List<Transaction> getTransactionsByRange(String profileId,
+                                       String startDate,
+                                       String endDate,
                                        String creationDate,
                                        String creationMonth,
                                        String creationYear,
+                                       String startAmount,
+                                       String endAmount,
                                        String transactionAmount,
                                        String transactionType,
                                        String transactionTag,
                                        String transactionRemarks,
-                                       int limit){
+                                       int limit) throws InterruptedException, ExecutionException, NullPointerException, ParseException {
+        CollectionReference transactionCollectionRef = firestore.collection(transactionCollection);
 
-        System.out.println("profileId: " + profileId);
-        System.out.println("creationDate: " + creationDate);
-        System.out.println("creationMonth: " + creationMonth);
-        System.out.println("creationYear: " + creationYear);
-        System.out.println("transactionAmount: " + transactionAmount);
-        System.out.println("transactionType: " + transactionType);
-        System.out.println("transactionTag: " + transactionTag);
-        System.out.println("transactionRemarks: " + transactionRemarks);
-    }
+        //? Query By ProfileId
+        Query query = transactionCollectionRef.whereEqualTo("profileId", profileId);
 
-    @Override
-    public void getTransactionsByRange(Date startDate, Date endDate, double startAmount, double endAmount){
+        //? Build time query by range
+        query = TransactionQueryBuilder.buildQueryByTimeRange(query,startDate,endDate,creationDate,creationMonth,creationYear);
 
+        //? Build transaction query by range
+        query = TransactionQueryBuilder.buildQueryByTransactionRange(query,startAmount,endAmount,transactionAmount,transactionType,transactionTag,transactionRemarks);
+
+        //? Query in the db
+        QuerySnapshot querySnapshot = query.get().get();
+        List<QueryDocumentSnapshot> transactionDocuments = querySnapshot.getDocuments();
+
+        return transactionDocuments.stream().map(queryDocumentSnapshot -> queryDocumentSnapshot.toObject(Transaction.class)).collect(Collectors.toList());
     }
 
     @Override

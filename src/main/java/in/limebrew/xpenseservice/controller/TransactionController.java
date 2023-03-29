@@ -65,14 +65,14 @@ public class TransactionController {
 
     @GetMapping(value = "/query")
     public ResponseEntity<?> getTransactionByQuery(@RequestHeader("Authorization") String authHeader,
-                                                   @RequestParam(defaultValue = "") String creationDate,
-                                                   @RequestParam(defaultValue = "") String creationMonth,
-                                                   @RequestParam(defaultValue = "") String creationYear,
-                                                   @RequestParam(defaultValue = "") String transactionAmount,
-                                                   @RequestParam(defaultValue = "") String transactionType,
-                                                   @RequestParam(defaultValue = "") String transactionTag,
-                                                   @RequestParam(defaultValue = "") String transactionRemark,
-                                                   @RequestParam(defaultValue = limitDefault ) int limit) {
+                                                   @RequestParam(defaultValue = "", required = false) String creationDate,
+                                                   @RequestParam(defaultValue = "", required = false) String creationMonth,
+                                                   @RequestParam(defaultValue = "", required = false) String creationYear,
+                                                   @RequestParam(defaultValue = "", required = false) String transactionAmount,
+                                                   @RequestParam(defaultValue = "", required = false) String transactionType,
+                                                   @RequestParam(defaultValue = "", required = false) String transactionTag,
+                                                   @RequestParam(defaultValue = "", required = false) String transactionRemarks,
+                                                   @RequestParam(defaultValue = limitDefault, required = false) int limit) {
 
         //? Check if Query limit request exceeds
         if(isLimitExceeds(limit))
@@ -86,7 +86,7 @@ public class TransactionController {
             FirebaseToken decodedToken = firebaseAuthService.verifyToken(token);
 
             //? Get all transactions by profile id
-             transactionService.getTransactionsByQuery(
+             List<Transaction> transactionByQuery =  transactionService.getTransactionsByQuery(
                     decodedToken.getUid(),
                     creationDate,
                     creationMonth,
@@ -94,17 +94,63 @@ public class TransactionController {
                     transactionAmount,
                     transactionType,
                     transactionTag,
-                    transactionRemark,
+                    transactionRemarks,
                     limit);
 
             //? Return response
-            return null;
+            return ResponseUtil.successGetMany(transactionByQuery);
 
-        } catch (FirebaseAuthException e) {
+        } catch (FirebaseAuthException | InterruptedException | NullPointerException | ExecutionException e) {
             return ResponseUtil.errorNotFound();
         }
 
     }
+
+    @GetMapping(value = "/query/range")
+    public ResponseEntity<?> getTransactionByQueryRange(@RequestHeader("Authorization") String authHeader,
+                                                        @RequestParam(defaultValue = "", required = false) String startDate,
+                                                        @RequestParam(defaultValue = "", required = false) String endDate,
+                                                        @RequestParam(defaultValue = "", required = false) String creationDate,
+                                                        @RequestParam(defaultValue = "", required = false) String creationMonth,
+                                                        @RequestParam(defaultValue = "", required = false) String creationYear,
+                                                        @RequestParam(defaultValue = "", required = false) String startAmount,
+                                                        @RequestParam(defaultValue = "", required = false) String endAmount,
+                                                        @RequestParam(defaultValue = "", required = false) String transactionAmount,
+                                                        @RequestParam(defaultValue = "", required = false) String transactionType,
+                                                        @RequestParam(defaultValue = "", required = false) String transactionTag,
+                                                        @RequestParam(defaultValue = "", required = false) String transactionRemarks,
+                                                        @RequestParam(defaultValue = limitDefault, required = false) int limit) {
+        try {
+            //? Extract the token
+            String token = authHeader.substring(7);
+
+            //? Verify the JWT
+            FirebaseToken decodedToken = firebaseAuthService.verifyToken(token);
+
+            //? Get all transactions by profile id
+            List<Transaction> transactionByRange =  transactionService.getTransactionsByRange(
+                    decodedToken.getUid(),
+                    startDate,
+                    endDate,
+                    creationDate,
+                    creationMonth,
+                    creationYear,
+                    startAmount,
+                    endAmount,
+                    transactionAmount,
+                    transactionType,
+                    transactionTag,
+                    transactionRemarks,
+                    limit);
+
+            //? Return response
+            return ResponseUtil.successGetMany(transactionByRange);
+
+        } catch (FirebaseAuthException | ExecutionException | InterruptedException | RuntimeException | ParseException e) {
+            return ResponseUtil.errorNotFound();
+        }
+    }
+
 
     @GetMapping(value = "/query/{id}")
     public ResponseEntity<?> getTransactionById(@RequestHeader("Authorization") String authHeader,

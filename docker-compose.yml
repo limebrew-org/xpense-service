@@ -1,0 +1,22 @@
+version: "3.1"
+services:
+  api:
+    #? Set container and image name
+    container_name: xpsense_service
+    image: xpense_service_image
+
+    #? build image
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    #? Environment
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: "/app/service-account.json"
+      GCLOUD_PROJECT_ID: "xpense-service"
+      GCLOUD_FIRESTORE_DB_URL: "https://xpense-service.firebaseio.com"
+      BUILD_NUMBER: "0"
+
+    #? Ports
+    ports:
+      - 8080:8080

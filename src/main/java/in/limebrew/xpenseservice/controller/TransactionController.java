@@ -147,6 +147,7 @@ public class TransactionController {
             return ResponseUtil.successGetMany(transactionByRange);
 
         } catch (FirebaseAuthException | ExecutionException | InterruptedException | RuntimeException | ParseException e) {
+            System.out.println(e);
             return ResponseUtil.errorNotFound();
         }
     }

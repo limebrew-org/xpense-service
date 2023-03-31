@@ -16,6 +16,27 @@
 	<properties>
 		<java.version>17</java.version>
 	</properties>
+
+	<distributionManagement>
+		<repository>
+			<id>artifact-registry</id>
+			<url>https://asia-east1-maven.pkg.dev/limebrew-378422/limebrew-maven-repo</url>
+		</repository>
+	</distributionManagement>
+
+	<repositories>
+		<repository>
+			<id>artifact-registry</id>
+			<url>https://asia-east1-maven.pkg.dev/limebrew-378422/limebrew-maven-repo</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

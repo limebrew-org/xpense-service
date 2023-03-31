@@ -5,8 +5,6 @@ WORKDIR /app
 
 ARG JAR_FILE=target/xpense-service-*.jar
 
-COPY ./credentials/service-account.json /app/service-account.json
-
 COPY ${JAR_FILE} /app/limebrew/app.jar
 
 ENTRYPOINT ["java", "-jar","/app/limebrew/app.jar"]

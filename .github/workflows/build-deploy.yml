@@ -36,11 +36,11 @@ jobs:
           ls -la
           ls -la target/
 
-#      - name: Push to Artifact Registry
-#        run: |
-#          #? set the password to push to artifact registry
-#          export MAVEN_ARTIFACT_CREDENTIALS=${{ secrets.MAVEN_ARTIFACT_CREDENTIALS }}
-#          mvn -s settings.xml -X -B deploy -DskipTests -DBUILD_NUMBER=${{ github.run_number }} -e
+      - name: Push to Artifact Registry
+        run: |
+          #? set the password to push to artifact registry
+          export MAVEN_ARTIFACT_CREDENTIALS=${{ secrets.MAVEN_ARTIFACT_CREDENTIALS }}
+          mvn -s settings.xml -X -B deploy -DskipTests -DBUILD_NUMBER=${{ github.run_number }} -e
 #
 #      - name: Build and push docker artifact
 #        run: |

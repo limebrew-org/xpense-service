@@ -1,0 +1,52 @@
+name: Build and Push xpense-service
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: 'temurin'
+
+      - name: Cache
+        uses: actions/cache@v3.3.0
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Clean
+        run: mvn -B clean -DskipTests -DBUILD_NUMBER=${{ github.run_number }}
+
+      - name: Build
+        run: mvn -B package -DskipTests -DBUILD_NUMBER=${{ github.run_number }}
+
+#      - name: Push to Artifact Registry
+#        run: |
+#          #? set the password to push to artifact registry
+#          export MAVEN_ARTIFACT_CREDENTIALS=${{ secrets.MAVEN_ARTIFACT_CREDENTIALS }}
+#          mvn -s settings.xml -X -B deploy -DskipTests -DBUILD_NUMBER=${{ github.run_number }} -e
+#
+#      - name: Build and push docker artifact
+#        run: |
+#          ls -la target/
+#          echo ${{ secrets.GCLOUD_ENCODED_API_KEY_LIMEBREW }} | base64 -d > /tmp/gcloud-api-key.json
+#          cat /tmp/gcloud-api-key.json | docker login -u _json_key --password-stdin https://${{ secrets.GCLOUD_DOCKER_REGISTRY_HOSTNAME }}
+#          export SERVICE_IMAGE_NAME=limecommerce
+#          export TAG_NAME=1.0.${{ github.run_number }}
+#          export GCR_IMAGE_NAME=${{ secrets.GCLOUD_DOCKER_REGISTRY_HOSTNAME }}/${{ secrets.GCLOUD_PROJECT_ID_LIMEBREW }}/${{ secrets.GCLOUD_DOCKER_REPO_NAME }}/$SERVICE_IMAGE_NAME
+#          docker build --no-cache -t $SERVICE_IMAGE_NAME .
+#          docker tag $SERVICE_IMAGE_NAME $GCR_IMAGE_NAME:$TAG_NAME
+#          docker push $GCR_IMAGE_NAME:$TAG_NAME

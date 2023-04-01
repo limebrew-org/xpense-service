@@ -1,4 +1,4 @@
 [submodule "limebrew-ci-scripts"]
 	path = limebrew-ci-scripts
 	url = git@github.com:limebrew-org/limebrew-ci-scripts.git
-    branch = main
+	branch = main

@@ -27,6 +27,9 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
+      - name: Initialize Submodules
+        run: git submodule update --recursive --init --remote
+
       - name: Clean
         run: mvn -B clean -DskipTests -DBUILD_NUMBER=${{ github.run_number }}
 

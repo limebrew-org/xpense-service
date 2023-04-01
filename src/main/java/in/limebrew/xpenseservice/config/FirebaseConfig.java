@@ -27,7 +27,6 @@ public class FirebaseConfig {
     @Value("${firebase.firestore.db.url}")
     private String firestoreDBUrl;
 
-
     @PostConstruct
     public FirebaseApp initializeFirebaseApp() throws IOException {
         FirebaseOptions options = new FirebaseOptions.Builder()

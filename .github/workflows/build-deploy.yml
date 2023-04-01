@@ -41,12 +41,12 @@ jobs:
       - name: Build
         run: bash limebrew-ci-scripts/scripts/ci/maven-build.sh ${{ github.run_number }}
 
-      - name: Push to Artifact Registry
+      - name: Push to Maven artifact repository
         run: |
           export MAVEN_SECRET=${{ secrets.MAVEN_ARTIFACT_CREDENTIALS }}
           bash limebrew-ci-scripts/scripts/ci/build-push-maven.sh ${{ github.run_number }}
 
-      - name: Build and push docker artifact
+      - name: Build and push Docker artifact repository
         run: |
           export GCLOUD_ENCODED_SERVICE_ACCOUNT_JSON=${{ secrets.GCLOUD_ENCODED_API_KEY_LIMEBREW }}
           export GCLOUD_DOCKER_REPO_HOST_NAME=${{ secrets.GCLOUD_DOCKER_REGISTRY_HOSTNAME }}

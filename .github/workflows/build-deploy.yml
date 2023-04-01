@@ -31,6 +31,8 @@ jobs:
 
       - name: Initialize Submodules
         run: |
+          ls -la
+          ls -la limebrew-ci-scripts/scripts/
           git submodule add -b main -- git@github.com:limebrew-org/limebrew-ci-scripts.git limebrew-ci-scripts
           git submodule init -- limebrew-ci-scripts
           git submodule update --recursive --init --remote

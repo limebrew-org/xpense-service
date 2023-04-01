@@ -34,32 +34,15 @@ jobs:
         run: |
           git submodule update --init --recursive
           git submodule update --recursive --remote
-          ls -la
-          ls -la limebrew-ci-scripts/
 
       - name: Clean
-        run: mvn -B clean -DskipTests -DBUILD_NUMBER=${{ github.run_number }}
+        run: bash limebrew-ci-scripts/scripts/ci/maven-clean.sh
 
       - name: Build
-        run: |
-          mvn -B package -DskipTests -DBUILD_NUMBER=${{ github.run_number }}
-          ls -la
-          ls -la target/
+        run: bash limebrew-ci-scripts/scripts/ci/maven-build.sh
 
       - name: Push to Artifact Registry
-        run: |
-          #? set the password to push to artifact registry
-          export MAVEN_ARTIFACT_CREDENTIALS=${{ secrets.MAVEN_ARTIFACT_CREDENTIALS }}
-          mvn -s settings.xml -X -B deploy -DskipTests -DBUILD_NUMBER=${{ github.run_number }} -e
+        run: bash limebrew-ci-scripts/scripts/ci/build-push-maven.sh
 
       - name: Build and push docker artifact
-        run: |
-          ls -la target/
-          echo ${{ secrets.GCLOUD_ENCODED_API_KEY_LIMEBREW }} | base64 -d > /tmp/gcloud-api-key.json
-          cat /tmp/gcloud-api-key.json | docker login -u _json_key --password-stdin https://${{ secrets.GCLOUD_DOCKER_REGISTRY_HOSTNAME }}
-          export SERVICE_IMAGE_NAME=xpense-service
-          export TAG_NAME=1.0.${{ github.run_number }}
-          export GCR_IMAGE_NAME=${{ secrets.GCLOUD_DOCKER_REGISTRY_HOSTNAME }}/${{ secrets.GCLOUD_PROJECT_ID_LIMEBREW }}/${{ secrets.GCLOUD_DOCKER_REPO_NAME }}/$SERVICE_IMAGE_NAME
-          docker build --no-cache -t $SERVICE_IMAGE_NAME .
-          docker tag $SERVICE_IMAGE_NAME $GCR_IMAGE_NAME:$TAG_NAME
-          docker push $GCR_IMAGE_NAME:$TAG_NAME
+        run: bash limebrew-ci-scripts/scripts/ci/build-push-docker.sh xpense-service

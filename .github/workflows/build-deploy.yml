@@ -36,13 +36,15 @@ jobs:
           git submodule update --recursive --remote
 
       - name: Clean
-        run: bash limebrew-ci-scripts/scripts/ci/maven-clean.sh
+        run: bash limebrew-ci-scripts/scripts/ci/maven-clean.sh ${{ github.run_number }}
 
       - name: Build
-        run: bash limebrew-ci-scripts/scripts/ci/maven-build.sh
+        run: bash limebrew-ci-scripts/scripts/ci/maven-build.sh ${{ github.run_number }}
 
       - name: Push to Artifact Registry
-        run: bash limebrew-ci-scripts/scripts/ci/build-push-maven.sh
+        run: |
+          export MAVEN_SECRET=${{ secrets.MAVEN_ARTIFACT_CREDENTIALS }}
+          bash limebrew-ci-scripts/scripts/ci/build-push-maven.sh ${{ github.run_number }}
 
       - name: Build and push docker artifact
         run: bash limebrew-ci-scripts/scripts/ci/build-push-docker.sh xpense-service

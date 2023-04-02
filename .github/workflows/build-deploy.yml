@@ -73,28 +73,39 @@ jobs:
           git submodule update --init --recursive
           git submodule update --recursive --remote
       
-      - name: Deploy to Cloud Run
-        run: |
-          #? Set Variables
-          export GCLOUD_ENCODED_SERVICE_ACCOUNT_JSON=${{ secrets.GCLOUD_ENCODED_API_KEY_LIMEBREW }}
-          export GCLOUD_PROJECT_SERVICE_ACCOUNT_ID=${{ secrets.GCLOUD_PROJECT_SERVICE_ACCOUNT_ID }}
-          export GCLOUD_PROJECT_ID=${{ secrets.GCLOUD_PROJECT_ID_LIMEBREW }}
+      - name: Setup gcloud CLI
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: '${{ secrets.GCLOUD_ENCODED_API_KEY_LIMEBREW }}'
+      
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v1'
 
-          #? Install gcloud CLI
-          bash limebrew-ci-scripts/scripts/gcloud/install-gcloud-cli.sh; source /tmp/google-cloud-cli/path.bash.inc
+      - name: 'Use gcloud CLI'
+        run: 'gcloud info'
+      
+      # - name: Deploy to Cloud Run
+      #   run: |
+      #     #? Set Variables
+      #     export GCLOUD_ENCODED_SERVICE_ACCOUNT_JSON=${{ secrets.GCLOUD_ENCODED_API_KEY_LIMEBREW }}
+      #     export GCLOUD_PROJECT_SERVICE_ACCOUNT_ID=${{ secrets.GCLOUD_PROJECT_SERVICE_ACCOUNT_ID }}
+      #     export GCLOUD_PROJECT_ID=${{ secrets.GCLOUD_PROJECT_ID_LIMEBREW }}
 
-          #? Authentication
-          bash limebrew-ci-scripts/scripts/gcloud/auth-login.sh
+      #     #? Install gcloud CLI
+      #     bash limebrew-ci-scripts/scripts/gcloud/install-gcloud-cli.sh; source /tmp/google-cloud-cli/path.bash.inc
 
-          #? Set service variables
-          export GCLOUD_LOCATION=${{ secrets.GCLOUD_LOCATION }}
-          export GCLOUD_DOCKER_REPO_NAME={{ secrets.GCLOUD_DOCKER_REPO_NAME }}
-          export SERVICE_IMAGE_NAME=xpense-service
-          export TAG_NAME=1.0.${{ github.run_number }}
-          export SERVICE_NAME=xpense-service
-          export ENVS="GCLOUD_FIRESTORE_DB_URL=${{ secrets.GCLOUD_FIRESTORE_DB_URL }},GCLOUD_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}"
-          export DEPLOYMENT_SERVICE_ACCOUNT=${{ secrets.DEPLOYMENT_SERVICE_ACCOUNT }}
+      #     #? Authentication
+      #     bash limebrew-ci-scripts/scripts/gcloud/auth-login.sh
+
+      #     #? Set service variables
+      #     export GCLOUD_LOCATION=${{ secrets.GCLOUD_LOCATION }}
+      #     export GCLOUD_DOCKER_REPO_NAME={{ secrets.GCLOUD_DOCKER_REPO_NAME }}
+      #     export SERVICE_IMAGE_NAME=xpense-service
+      #     export TAG_NAME=1.0.${{ github.run_number }}
+      #     export SERVICE_NAME=xpense-service
+      #     export ENVS="GCLOUD_FIRESTORE_DB_URL=${{ secrets.GCLOUD_FIRESTORE_DB_URL }},GCLOUD_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}"
+      #     export DEPLOYMENT_SERVICE_ACCOUNT=${{ secrets.DEPLOYMENT_SERVICE_ACCOUNT }}
           
-          #? Deploy to Cloud Run
-          bash limebrew-ci-scripts/scripts/cd/deploy-cloud-run.sh $SERVICE_IMAGE_NAME
+      #     #? Deploy to Cloud Run
+      #     bash limebrew-ci-scripts/scripts/cd/deploy-cloud-run.sh $SERVICE_IMAGE_NAME
 

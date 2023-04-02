@@ -55,3 +55,46 @@ jobs:
           export SERVICE_IMAGE_NAME=xpense-service
           export TAG_NAME=1.0.${{ github.run_number }}
           bash limebrew-ci-scripts/scripts/ci/build-push-docker.sh
+  
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+    
+      - name: Initialize Submodules
+        run: |
+          git submodule update --init --recursive
+          git submodule update --recursive --remote
+      
+      - name: Deploy to Cloud Run
+        run: |
+          #? Set Variables
+          export GCLOUD_ENCODED_SERVICE_ACCOUNT_JSON=${{ secrets.GCLOUD_ENCODED_API_KEY_LIMEBREW }}
+          export GCLOUD_PROJECT_SERVICE_ACCOUNT_ID=${{ secrets.GCLOUD_PROJECT_SERVICE_ACCOUNT_ID }}
+          export GCLOUD_PROJECT_ID=${{ secrets.GCLOUD_PROJECT_ID_LIMEBREW }}
+
+          #? Install gcloud CLI
+          bash limebrew-ci-scripts/scripts/gcloud/install-gcloud-cli.sh; source /tmp/google-cloud-cli/path.bash.inc
+
+          #? Authentication
+          bash limebrew-ci-scripts/scripts/gcloud/auth-login.sh
+
+          #? Set service variables
+          export GCLOUD_LOCATION=${{ secrets.GCLOUD_LOCATION }}
+          export GCLOUD_DOCKER_REPO_NAME={{ secrets.GCLOUD_DOCKER_REPO_NAME }}
+          export SERVICE_IMAGE_NAME=xpense-service
+          export TAG_NAME=1.0.${{ github.run_number }}
+          export SERVICE_NAME=xpense-service
+          export ENVS="GCLOUD_FIRESTORE_DB_URL=${{ secrets.GCLOUD_FIRESTORE_DB_URL }},GCLOUD_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}"
+          export DEPLOYMENT_SERVICE_ACCOUNT=${{ secrets.DEPLOYMENT_SERVICE_ACCOUNT }}
+          
+          #? Deploy to Cloud Run
+          bash limebrew-ci-scripts/scripts/cd/deploy-cloud-run.sh $SERVICE_IMAGE_NAME
+

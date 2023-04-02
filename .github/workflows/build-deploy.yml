@@ -43,7 +43,7 @@ jobs:
 
       - name: Push to Maven artifact repository
         run: |
-          export MAVEN_SECRET=${{ secrets.MAVEN_ARTIFACT_CREDENTIALS }}
+          export MAVEN_ARTIFACT_CREDENTIALS=${{ secrets.MAVEN_ARTIFACT_CREDENTIALS }}
           bash limebrew-ci-scripts/scripts/ci/build-push-maven.sh ${{ github.run_number }}
 
       - name: Build and push Docker artifact repository

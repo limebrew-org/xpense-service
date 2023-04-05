@@ -36,63 +36,72 @@ jobs:
           git submodule update --recursive --remote
 
       - name: Clean
-        run: bash limebrew-ci-scripts/scripts/ci/maven-clean.sh ${{ github.run_number }}
+        run: |
+          export BUILD_NUMBER=${{ github.run_number }}
+          export GCLOUD_MAVEN_ARTIFACT_DISTRIBUTION_URL=${{ secrets.GCLOUD_MAVEN_ARTIFACT_DISTRIBUTION_URL }}
+          bash limebrew-ci-scripts/scripts/ci/maven-clean.sh $BUILD_NUMBER
 
       - name: Build
-        run: bash limebrew-ci-scripts/scripts/ci/maven-build.sh ${{ github.run_number }}
+        run: |
+          export BUILD_NUMBER=${{ github.run_number }}
+          export GCLOUD_MAVEN_ARTIFACT_DISTRIBUTION_URL=${{ secrets.GCLOUD_MAVEN_ARTIFACT_DISTRIBUTION_URL }}
+          bash limebrew-ci-scripts/scripts/ci/maven-build.sh $BUILD_NUMBER
 
       - name: Push to Maven artifact repository
         run: |
-          export MAVEN_ARTIFACT_CREDENTIALS=${{ secrets.MAVEN_ARTIFACT_CREDENTIALS }}
-          bash limebrew-ci-scripts/scripts/ci/build-push-maven.sh ${{ github.run_number }}
+          export BUILD_NUMBER=${{ github.run_number }}
+          export GCLOUD_MAVEN_ARTIFACT_CREDENTIALS=${{ secrets.GCLOUD_MAVEN_ARTIFACT_CREDENTIALS }}
+          export GCLOUD_MAVEN_ARTIFACT_DISTRIBUTION_URL=${{ secrets.GCLOUD_MAVEN_ARTIFACT_DISTRIBUTION_URL }}
+          bash limebrew-ci-scripts/scripts/ci/build-push-maven.sh $BUILD_NUMBER
 
       - name: Build and push Docker artifact repository
         run: |
-          export GCLOUD_ENCODED_SERVICE_ACCOUNT_JSON=${{ secrets.GCLOUD_ENCODED_API_KEY_LIMEBREW }}
-          export GCLOUD_DOCKER_REPO_HOST_NAME=${{ secrets.GCLOUD_DOCKER_REGISTRY_HOSTNAME }}
-          export GCLOUD_PROJECT_ID=${{ secrets.GCLOUD_PROJECT_ID_LIMEBREW }}
+          export BUILD_NUMBER=${{ github.run_number }}
+          export GCLOUD_ENCODED_SERVICE_ACCOUNT_JSON=${{ secrets.GCLOUD_ENCODED_INFRA_CICD_API_KEY }}
+          export GCLOUD_DOCKER_REPO_HOST_NAME=${{ secrets.GCLOUD_DOCKER_REPO_HOSTNAME }}
+          export GCLOUD_PROJECT_ID=${{ secrets.GCLOUD_INFRA_CICD_PROJECT_ID }}
           export GCLOUD_DOCKER_REPO_NAME=${{ secrets.GCLOUD_DOCKER_REPO_NAME }}
           export SERVICE_IMAGE_NAME=xpense-service
-          export TAG_NAME=1.0.${{ github.run_number }}
+          export TAG_NAME=1.0.$BUILD_NUMBER
           bash limebrew-ci-scripts/scripts/ci/build-push-docker.sh
   
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      contents: read
-      packages: write
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   permissions:
+  #     contents: read
+  #     packages: write
 
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         submodules: true
     
-      - name: Initialize Submodules
-        run: |
-          git submodule update --init --recursive
-          git submodule update --recursive --remote
+  #     - name: Initialize Submodules
+  #       run: |
+  #         git submodule update --init --recursive
+  #         git submodule update --recursive --remote
       
-      - name: Setup gcloud Authentication
-        uses: 'google-github-actions/auth@v1'
-        with:
-          credentials_json: '${{ secrets.GCLOUD_ENCODED_API_KEY_LIMEBREW }}'
+  #     - name: Setup gcloud Authentication
+  #       uses: 'google-github-actions/auth@v1'
+  #       with:
+  #         credentials_json: '${{ secrets.GCLOUD_ENCODED_API_KEY_LIMEBREW }}'
       
-      - name: 'Set up Cloud CLI'
-        uses: 'google-github-actions/setup-gcloud@v1'
+  #     - name: 'Set up Cloud CLI'
+  #       uses: 'google-github-actions/setup-gcloud@v1'
       
-      - name: Deploy to Cloud Run
-        run: |
-          #? Set service variables
-          export GCLOUD_PROJECT_ID=${{ secrets.GCLOUD_PROJECT_ID_LIMEBREW }}
-          export GCLOUD_LOCATION=${{ secrets.GCLOUD_LOCATION }}
-          export GCLOUD_DOCKER_REPO_NAME=${{ secrets.GCLOUD_DOCKER_REPO_NAME }}
-          export SERVICE_IMAGE_NAME=xpense-service
-          export TAG_NAME=1.0.${{ github.run_number }}
-          export SERVICE_NAME=xpense-service
-          export ENVS="GCLOUD_FIRESTORE_DB_URL=${{ secrets.GCLOUD_FIRESTORE_DB_URL }},GCLOUD_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}"
-          export DEPLOYMENT_SERVICE_ACCOUNT=${{ secrets.DEPLOYMENT_SERVICE_ACCOUNT }}
+  #     - name: Deploy to Cloud Run
+  #       run: |
+  #         #? Set service variables
+  #         export GCLOUD_PROJECT_ID=${{ secrets.GCLOUD_PROJECT_ID_LIMEBREW }}
+  #         export GCLOUD_LOCATION=${{ secrets.GCLOUD_LOCATION }}
+  #         export GCLOUD_DOCKER_REPO_NAME=${{ secrets.GCLOUD_DOCKER_REPO_NAME }}
+  #         export SERVICE_IMAGE_NAME=xpense-service
+  #         export TAG_NAME=1.0.${{ github.run_number }}
+  #         export SERVICE_NAME=xpense-service
+  #         export ENVS="GCLOUD_FIRESTORE_DB_URL=${{ secrets.GCLOUD_FIRESTORE_DB_URL }},GCLOUD_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}"
+  #         export DEPLOYMENT_SERVICE_ACCOUNT=${{ secrets.DEPLOYMENT_SERVICE_ACCOUNT }}
           
-          #? Deploy to Cloud Run
-          bash limebrew-ci-scripts/scripts/cd/deploy-cloud-run.sh
+  #         #? Deploy to Cloud Run
+  #         bash limebrew-ci-scripts/scripts/cd/deploy-cloud-run.sh
 

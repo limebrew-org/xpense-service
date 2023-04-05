@@ -20,14 +20,14 @@
 	<distributionManagement>
 		<repository>
 			<id>artifact-registry</id>
-			<url>https://asia-east1-maven.pkg.dev/limebrew-378422/limebrew-maven-repo</url>
+			<url>${GCLOUD_MAVEN_ARTIFACT_DISTRIBUTION_URL}</url>
 		</repository>
 	</distributionManagement>
 
 	<repositories>
 		<repository>
 			<id>artifact-registry</id>
-			<url>https://asia-east1-maven.pkg.dev/limebrew-378422/limebrew-maven-repo</url>
+			<url>${GCLOUD_MAVEN_ARTIFACT_DISTRIBUTION_URL}</url>
 			<releases>
 				<enabled>true</enabled>
 			</releases>

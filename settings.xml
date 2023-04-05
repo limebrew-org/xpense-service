@@ -21,7 +21,7 @@
                 </httpConfiguration>
             </configuration>
             <username>_json_key_base64</username>
-            <password>${MAVEN_ARTIFACT_CREDENTIALS}</password>
+            <password>${GCLOUD_MAVEN_ARTIFACT_CREDENTIALS}</password>
         </server>
     </servers>
 </settings>

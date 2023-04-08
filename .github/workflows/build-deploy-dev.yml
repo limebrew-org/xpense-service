@@ -96,6 +96,7 @@ jobs:
           export GCLOUD_PROJECT_ID=${{ secrets.GCLOUD_PROJECT_XPENSE_SERVICE_DEV }}
           export GCLOUD_LOCATION=${{ secrets.GCLOUD_LOCATION }}
           export GCLOUD_DOCKER_REPO_NAME=${{ secrets.GCLOUD_DOCKER_REPO_NAME }}
+          export GCLOUD_DOCKER_REPO_HOST_NAME=${{ secrets.GCLOUD_DOCKER_REPO_HOSTNAME }}
           export SERVICE_IMAGE_NAME=xpense-service
           export TAG_NAME=1.0.${{ github.run_number }}
           export SERVICE_NAME=xpense-service

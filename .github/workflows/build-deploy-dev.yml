@@ -52,6 +52,8 @@ jobs:
           export BUILD_NUMBER=${{ github.run_number }}
           export GCLOUD_MAVEN_ARTIFACT_CREDENTIALS=${{ secrets.GCLOUD_MAVEN_ARTIFACT_CREDENTIALS }}
           export GCLOUD_MAVEN_ARTIFACT_DISTRIBUTION_URL=${{ secrets.GCLOUD_MAVEN_ARTIFACT_DISTRIBUTION_URL }}
+
+          #? Push to Maven artifact repository
           bash limebrew-ci-scripts/scripts/ci/build-push-maven.sh $BUILD_NUMBER
 
       - name: Build and push Docker artifact repository
@@ -61,8 +63,10 @@ jobs:
           export GCLOUD_DOCKER_REPO_HOST_NAME=${{ secrets.GCLOUD_DOCKER_REPO_HOSTNAME }}
           export GCLOUD_PROJECT_ID=${{ secrets.GCLOUD_INFRA_CICD_PROJECT_ID }}
           export GCLOUD_DOCKER_REPO_NAME=${{ secrets.GCLOUD_DOCKER_REPO_NAME }}
-          export SERVICE_IMAGE_NAME=xpense-service
+          export SERVICE_IMAGE_NAME=${{ secrets.GCLOUD_SERVICE_IMAGE_NAME }}
           export TAG_NAME=1.0.$BUILD_NUMBER
+
+          #? Push to Docker artifact repository
           bash limebrew-ci-scripts/scripts/ci/build-push-docker.sh
   
   deploy:
@@ -98,12 +102,12 @@ jobs:
           export GCLOUD_LOCATION=${{ secrets.GCLOUD_LOCATION }}
           export GCLOUD_DOCKER_REPO_NAME=${{ secrets.GCLOUD_DOCKER_REPO_NAME }}
           export GCLOUD_DOCKER_REPO_HOST_NAME=${{ secrets.GCLOUD_DOCKER_REPO_HOSTNAME }}
-          export SERVICE_IMAGE_NAME=xpense-service
+          export SERVICE_IMAGE_NAME=${{ secrets.GCLOUD_SERVICE_IMAGE_NAME }}
           export TAG_NAME=1.0.${{ github.run_number }}
-          export SERVICE_NAME=xpense-service
+          export SERVICE_NAME=${{ secrets.GCLOUD_CLOUD_RUN_SERVICE_NAME_DEV }}
           export ENVS="GCLOUD_FIRESTORE_DB_URL=${{ secrets.GCLOUD_FIRESTORE_DB_URL_DEV }},GCLOUD_PROJECT_ID=$GCLOUD_PROJECT_ID"
           export GCLOUD_APPLICATION_SERVICE_ACCOUNT_ID=${{ secrets.GCLOUD_APPLICATION_SERVICE_ACCOUNT_ID_DEV }}
           
-          #? Deploy to Cloud Run
+          #? Deploy to Cloud Run (Dev)
           bash limebrew-ci-scripts/scripts/cd/deploy-cloud-run.sh
 
